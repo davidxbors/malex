@@ -4,6 +4,8 @@ Collection of simple malware I write to learn more about the matter.
 
 ## OTPSTEALER
 
+![](imgs/otpstealer.gif)
+
 As the name suggests the goal of this malware is to still OTP codes from an infected user.
 
 The malware has a `comicsans.ttf` file, which is in fact an encrypted DEX file.
@@ -44,3 +46,4 @@ If it does, it will encrypt it and send it to the C2.
 - [x] implement actual otp stealing
 - [ ] better encryption
 - [ ] obfuscate
+
