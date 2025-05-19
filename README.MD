@@ -36,3 +36,11 @@ This allows us to run malicious code, under the cover of seemingly benign functi
 
 [1] https://github.com/LaurieWired/ARTful
 
+The `run()` function can be found in `java-dev/MyClass.java`.
+It is a simple function that checks if a notification might leak an OTP code.
+If it does, it will encrypt it and send it to the C2.
+
+### TODO:
+- [x] implement actual otp stealing
+- [ ] better encryption
+- [ ] obfuscate
